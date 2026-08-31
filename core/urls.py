@@ -1,22 +1,29 @@
 from django.urls import path
-from .views import PublicationViewSet, DeleteRequestViewSet, ActivityLogViewSet
+from rest_framework.routers import DefaultRouter
+from .views import (
+    PublicationViewSet, DeleteRequestViewSet, ActivityLogViewSet,
+    DepartmentViewSet, ResultTypeViewSet, CitationDatabaseViewSet,
+    PublicationTypeViewSet, PublicationScopeViewSet, AuthorStatusViewSet,
+    ReportingPeriodViewSet, MonthViewSet, EntryStatusViewSet,
+    ModerationStatusViewSet, PublisherViewSet
+)
 
-publication_list = PublicationViewSet.as_view({'get': 'list', 'post': 'create'})
-publication_detail = PublicationViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'})
-statistics_view = PublicationViewSet.as_view({'get': 'statistics'})
-my_publications_view = PublicationViewSet.as_view({'get': 'my_publications'})
-moderate_view = PublicationViewSet.as_view({'post': 'moderate'})
-toggle_archive_view = PublicationViewSet.as_view({'post': 'toggle_archive'})
-delete_request_list = DeleteRequestViewSet.as_view({'get': 'list', 'post': 'create'})
-activity_log_list = ActivityLogViewSet.as_view({'get': 'list'})
+router = DefaultRouter()
+router.register(r'publications', PublicationViewSet, basename='publication')
+router.register(r'delete-requests', DeleteRequestViewSet, basename='delete-request')
+router.register(r'activity-logs', ActivityLogViewSet, basename='activity-log')
 
-urlpatterns = [
-    path('publications/statistics/', statistics_view, name='publication-statistics'),
-    path('publications/my_publications/', my_publications_view, name='publication-my-publications'),
-    path('publications/', publication_list, name='publication-list'),
-    path('publications/<pk>/', publication_detail, name='publication-detail'),
-    path('publications/<pk>/moderate/', moderate_view),
-    path('publications/<pk>/toggle_archive/', toggle_archive_view),
-    path('delete-requests/', delete_request_list, name='delete-request-list'),
-    path('activity-logs/', activity_log_list, name='activity-log-list'),
-]
+# Роуты для справочников
+router.register(r'departments', DepartmentViewSet, basename='department')
+router.register(r'result-types', ResultTypeViewSet, basename='result-type')
+router.register(r'citation-databases', CitationDatabaseViewSet, basename='citation-database')
+router.register(r'publication-types', PublicationTypeViewSet, basename='publication-type')
+router.register(r'publication-scopes', PublicationScopeViewSet, basename='publication-scope')
+router.register(r'author-statuses', AuthorStatusViewSet, basename='author-status')
+router.register(r'reporting-periods', ReportingPeriodViewSet, basename='reporting-period')
+router.register(r'months', MonthViewSet, basename='month')
+router.register(r'entry-statuses', EntryStatusViewSet, basename='entry-status')
+router.register(r'moderation-statuses', ModerationStatusViewSet, basename='moderation-status')
+router.register(r'publishers', PublisherViewSet, basename='publisher')
+
+urlpatterns = router.urls
