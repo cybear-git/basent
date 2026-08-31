@@ -8,99 +8,172 @@ def current_year():
     return datetime.date.today().year
 
 
+# === Справочники для нормализации базы данных ===
+
+class Department(models.Model):
+    """Справочник кафедр"""
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код кафедры')
+    full_name = models.TextField(verbose_name='Полное название')
+    short_name = models.CharField(max_length=100, blank=True, verbose_name='Краткое название')
+    description = models.TextField(blank=True, verbose_name='Описание')
+    email = models.EmailField(blank=True, verbose_name='Email')
+    phone = models.CharField(max_length=20, blank=True, verbose_name='Телефон')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Кафедра'
+        verbose_name_plural = 'Кафедры'
+        ordering = ['code']
+
+    def __str__(self):
+        return f"{self.code} - {self.short_name or self.full_name}"
+
+
+class ResultType(models.Model):
+    """Справочник результатов (участник, призёр, победитель)"""
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код результата')
+    name = models.CharField(max_length=50, unique=True, verbose_name='Название результата')
+    display_name = models.CharField(max_length=50, verbose_name='Отображаемое название')
+    description = models.TextField(blank=True, verbose_name='Описание')
+
+    class Meta:
+        verbose_name = 'Тип результата'
+        verbose_name_plural = 'Типы результатов'
+        ordering = ['display_name']
+
+    def __str__(self):
+        return self.display_name
+
+
+class CitationDatabase(models.Model):
+    """Справочник баз данных цитирования"""
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код')
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название')
+    description = models.TextField(blank=True, verbose_name='Описание')
+    website = models.URLField(blank=True, verbose_name='Сайт')
+
+    class Meta:
+        verbose_name = 'База данных цитирования'
+        verbose_name_plural = 'Базы данных цитирования'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class PublicationType(models.Model):
+    """Справочник типов публикаций"""
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код типа')
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название')
+    description = models.TextField(blank=True, verbose_name='Описание')
+    is_active = models.BooleanField(default=True, verbose_name='Активен')
+
+    class Meta:
+        verbose_name = 'Тип публикации'
+        verbose_name_plural = 'Типы публикаций'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class PublicationScope(models.Model):
+    """Справочник уровней публикаций/мероприятий"""
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код уровня')
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название')
+    description = models.TextField(blank=True, verbose_name='Описание')
+
+    class Meta:
+        verbose_name = 'Уровень публикации'
+        verbose_name_plural = 'Уровни публикаций'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class AuthorStatus(models.Model):
+    """Справочник статусов авторов"""
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код статуса')
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название')
+    description = models.TextField(blank=True, verbose_name='Описание')
+
+    class Meta:
+        verbose_name = 'Статус автора'
+        verbose_name_plural = 'Статусы авторов'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class ReportingPeriod(models.Model):
+    """Справочник отчётных периодов"""
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код периода')
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название')
+    display_order = models.PositiveIntegerField(default=0, verbose_name='Порядок отображения')
+    is_active = models.BooleanField(default=True, verbose_name='Активен')
+
+    class Meta:
+        verbose_name = 'Отчётный период'
+        verbose_name_plural = 'Отчётные периоды'
+        ordering = ['display_order', 'name']
+
+    def __str__(self):
+        return self.name
+
+
+class Month(models.Model):
+    """Справочник месяцев"""
+    number = models.PositiveIntegerField(unique=True, verbose_name='Номер месяца')
+    name = models.CharField(max_length=50, unique=True, verbose_name='Название')
+    short_name = models.CharField(max_length=10, blank=True, verbose_name='Краткое название')
+
+    class Meta:
+        verbose_name = 'Месяц'
+        verbose_name_plural = 'Месяцы'
+        ordering = ['number']
+
+    def __str__(self):
+        return self.name
+
+
+class EntryStatus(models.Model):
+    """Справочник статусов записей"""
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код статуса')
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название')
+    description = models.TextField(blank=True, verbose_name='Описание')
+    color = models.CharField(max_length=20, blank=True, verbose_name='Цвет для отображения')
+
+    class Meta:
+        verbose_name = 'Статус записи'
+        verbose_name_plural = 'Статусы записей'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class ModerationStatus(models.Model):
+    """Справочник статусов модерации"""
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код статуса')
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название')
+    description = models.TextField(blank=True, verbose_name='Описание')
+    color = models.CharField(max_length=20, blank=True, verbose_name='Цвет для отображения')
+
+    class Meta:
+        verbose_name = 'Статус модерации'
+        verbose_name_plural = 'Статусы модерации'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+# === Основная модель публикации ===
+
 class Publication(models.Model):
-    RESULT_CHOICES = [
-        ('участник', 'Участник'),
-        ('призёр', 'Призёр'),
-        ('победитель', 'Победитель'),
-    ]
-
-    DEPARTMENT_CHOICES = [
-        ('КТОиТК', 'Кафедра таможенных операций и таможенного контроля'),
-        ('КТиТЭ', 'Кафедра товароведения и таможенной экспертизы'),
-        ('КУиЭТД', 'Кафедра управления и экономики таможенного дела'),
-        ('КЭТиМЭО', 'Кафедра экономической теории и международных экономических отношений'),
-        ('КГПД', 'Кафедра государственно-правовых дисциплин'),
-        ('КГрПД', 'Кафедра гражданско-правовых дисциплин'),
-        ('КУПД', 'Кафедра уголовно-правовых дисциплин'),
-        ('КГД', 'Кафедра гуманитарных дисциплин'),
-        ('КИЯ', 'Кафедра иностранных языков'),
-        ('КИиИТТ', 'Кафедра информатики и информационных таможенных технологий'),
-        ('КФП', 'Кафедра физической подготовки'),
-    ]
-
-    MONTH_CHOICES = [
-        (1, 'Январь'), (2, 'Февраль'), (3, 'Март'), (4, 'Апрель'),
-        (5, 'Май'), (6, 'Июнь'), (7, 'Июль'), (8, 'Август'),
-        (9, 'Сентябрь'), (10, 'Октябрь'), (11, 'Ноябрь'), (12, 'Декабрь'),
-    ]
-
-    STATUS_CHOICES = [
-        ('active', 'Активна'),
-        ('marked_for_deletion', 'Помечена на удаление'),
-        ('archived', 'Архивирована'),
-    ]
-
-    MODERATION_STATUS = [
-        ('pending', 'На модерации'),
-        ('approved', 'Одобрено'),
-        ('rejected', 'Отклонено'),
-    ]
-
-    CITATION_DB_CHOICES = [
-        ('RINC', 'РИНЦ'),
-        ('VAK', 'ВАК'),
-        ('WOS', 'WOS'),
-        ('SCOPUS', 'Scopus'),
-        ('OTHER_DB', 'Другие издания'),
-        ('NONE', 'Без индексации'),
-    ]
-
-    PUBLICATION_TYPE_CHOICES = [
-        ('article', 'Статья'),
-        ('student_article', 'Статья студента'),
-        ('monograph', 'Монография'),
-        ('textbook', 'Учебник'),
-        ('tutorial', 'Учебное пособие'),
-        ('conference_paper', 'Тезисы докладов'),
-        ('software_certificate', 'Свидетельство ЭВМ'),
-        ('patent', 'Патенты на изобретения'),
-        ('student_research', 'НИРС'),
-        ('conference', 'Научная конференция'),
-        ('forum', 'Научный форум'),
-        ('competition', 'Научный конкурс'),
-        ('exhibition', 'Выставка'),
-        ('round_table', 'Круглый стол'),
-        ('conference_collection', 'Сборник трудов конференции'),
-    ]
-
-    PUBLICATION_SCOPE_CHOICES = [
-        ('international', 'Международное'),
-        ('all_russian', 'Всероссийское'),
-        ('regional', 'Региональное'),
-        ('interuniversity', 'Межвузовское'),
-        ('internal', 'Внутривузовское'),
-    ]
-
-    AUTHOR_STATUS_CHOICES = [
-        ('staff', 'Штатный сотрудник'),
-        ('student', 'Студент'),
-        ('compatibility', 'Совместитель'),
-        ('external', 'Внешний сотрудник'),
-    ]
-
-    REPORTING_PERIOD_CHOICES = [
-        ('1_quarter', '1 квартал'),
-        ('2_quarter', '2 квартал'),
-        ('3_quarter', '3 квартал'),
-        ('4_quarter', '4 квартал'),
-        ('1_period', '1 период'),
-        ('2_period', '2 период'),
-        ('3_period', '3 период'),
-        ('4_period', '4 период'),
-        ('annual', 'Годовой отчёт'),
-    ]
-
     title = models.TextField(verbose_name='Название публикации/мероприятия')
     author = models.TextField(verbose_name='Автор(ы)')
     
@@ -121,20 +194,70 @@ class Publication(models.Model):
     students_count = models.PositiveIntegerField(default=0, verbose_name='Количество студентов')
     pages_count = models.PositiveIntegerField(default=0, verbose_name='Количество страниц')
 
-    result = models.CharField(max_length=20, choices=RESULT_CHOICES, blank=True, verbose_name='Результат')
-    citation_db = models.CharField(max_length=50, choices=CITATION_DB_CHOICES, blank=True, verbose_name='База данных и система цитирования')
-    
-    publication_type = models.CharField(
-        max_length=30,
-        choices=PUBLICATION_TYPE_CHOICES,
+    # Связи со справочниками (вместо CHOICES)
+    result = models.ForeignKey(
+        ResultType,
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
+        related_name='publications',
+        verbose_name='Результат'
+    )
+    citation_db = models.ForeignKey(
+        CitationDatabase,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='publications',
+        verbose_name='База данных и система цитирования'
+    )
+    publication_type = models.ForeignKey(
+        PublicationType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='publications',
         verbose_name='Тип публикации'
     )
-    publication_scope = models.CharField(
-        max_length=20,
-        choices=PUBLICATION_SCOPE_CHOICES,
+    publication_scope = models.ForeignKey(
+        PublicationScope,
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
+        related_name='publications',
         verbose_name='Уровень публикации'
+    )
+    author_status = models.ForeignKey(
+        AuthorStatus,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='publications',
+        verbose_name='Статус автора'
+    )
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='publications',
+        verbose_name='Кафедра'
+    )
+    entry_month = models.ForeignKey(
+        Month,
+        on_delete=models.SET_NULL,
+        null=True,
+        default=None,
+        related_name='publications',
+        verbose_name='Месяц внесения'
+    )
+    reporting_period = models.ForeignKey(
+        ReportingPeriod,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='publications',
+        verbose_name='Отчётный период'
     )
     
     publisher = models.ForeignKey(
@@ -157,22 +280,7 @@ class Publication(models.Model):
     edn_code = models.CharField(max_length=20, blank=True, verbose_name='EDN')
     elibrary_id = models.CharField(max_length=50, blank=True, verbose_name='ELibrary ID')
     
-    reporting_period = models.CharField(
-        max_length=20,
-        choices=REPORTING_PERIOD_CHOICES,
-        blank=True,
-        verbose_name='Отчётный период'
-    )
     reporting_year = models.CharField(max_length=10, blank=True, verbose_name='Отчётный год')
-    
-    author_status = models.CharField(
-        max_length=20,
-        choices=AUTHOR_STATUS_CHOICES,
-        blank=True,
-        verbose_name='Статус автора'
-    )
-    department = models.CharField(max_length=100, choices=DEPARTMENT_CHOICES, blank=True, default='КТОиТК', verbose_name='Кафедра')
-    entry_month = models.IntegerField(choices=MONTH_CHOICES, default=datetime.date.today().month, verbose_name='Месяц внесения')
     event_date = models.DateField(null=True, blank=True, verbose_name='Дата проведения')
 
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -183,19 +291,22 @@ class Publication(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='publications',
+        related_name='owned_publications',
         verbose_name='Владелец записи'
     )
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='active',
+    # Связи со справочниками статусов (вместо CHOICES)
+    status = models.ForeignKey(
+        EntryStatus,
+        on_delete=models.SET_DEFAULT,
+        default=None,  # Будет установлен через save()
+        related_name='publications_by_status',
         verbose_name='Статус записи'
     )
-    moderation_status = models.CharField(
-        max_length=20,
-        choices=MODERATION_STATUS,
-        default='pending',
+    moderation_status_rel = models.ForeignKey(
+        ModerationStatus,
+        on_delete=models.SET_DEFAULT,
+        default=None,  # Будет установлен через save()
+        related_name='publications_by_moderation_status',
         verbose_name='Статус модерации'
     )
     is_archived = models.BooleanField(default=False, verbose_name='В архиве')
@@ -218,14 +329,28 @@ class Publication(models.Model):
             models.Index(fields=['status', '-created_at']),
             models.Index(fields=['department', 'year']),
             models.Index(fields=['title']),
-            models.Index(fields=['publication_type']),
-            models.Index(fields=['citation_db']),
-            models.Index(fields=['reporting_period']),
+            models.Index(fields=['publication_type', '-created_at']),
+            models.Index(fields=['citation_db', '-created_at']),
+            models.Index(fields=['reporting_period', '-created_at']),
             models.Index(fields=['is_archived', '-created_at']),
         ]
 
     def __str__(self):
         return f"{self.title} ({self.author})"
+
+    def save(self, *args, **kwargs):
+        # Устанавливаем значения по умолчанию для статусов при создании
+        if not self.status_id:
+            try:
+                self.status = EntryStatus.objects.get(code='active')
+            except EntryStatus.DoesNotExist:
+                pass
+        if not self.moderation_status_rel_id:
+            try:
+                self.moderation_status_rel = ModerationStatus.objects.get(code='pending')
+            except ModerationStatus.DoesNotExist:
+                pass
+        super().save(*args, **kwargs)
 
 
 class Publisher(models.Model):

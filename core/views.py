@@ -8,13 +8,17 @@ from django.utils import timezone
 from django.core.cache import cache
 import re
 
-from .models import Publication, DeleteRequest, ActivityLog
+from .models import Publication, DeleteRequest, ActivityLog, Publisher, Department, ResultType, CitationDatabase, PublicationType, PublicationScope, AuthorStatus, ReportingPeriod, Month, EntryStatus, ModerationStatus
 from .serializers import (
     PublicationListSerializer, PublicationDetailSerializer,
     PublicationCreateSerializer, PublicationUpdateSerializer,
     PublicationModerateSerializer,
     DeleteRequestSerializer, DeleteRequestCreateSerializer,
-    ActivityLogSerializer
+    ActivityLogSerializer,
+    DepartmentSerializer, ResultTypeSerializer, CitationDatabaseSerializer,
+    PublicationTypeSerializer, PublicationScopeSerializer, AuthorStatusSerializer,
+    ReportingPeriodSerializer, MonthSerializer, EntryStatusSerializer,
+    ModerationStatusSerializer, PublisherSerializer
 )
 from .permissions import (
     CanCreatePublication, CanUpdateOwnPublication, CanDeletePublication,
@@ -587,3 +591,113 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
         }
         cache.set(cache_key, response_data, 3600)
         return Response(response_data)
+
+
+
+# === ViewSets для справочников ===
+
+class DepartmentViewSet(viewsets.ReadOnlyModelViewSet):
+    """API для просмотра кафедр"""
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
+    permission_classes = [AllowAny]
+    search_fields = ["code", "full_name", "short_name"]
+    ordering_fields = ["code", "full_name"]
+    ordering = ["code"]
+
+
+class ResultTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    """API для просмотра типов результатов"""
+    queryset = ResultType.objects.all()
+    serializer_class = ResultTypeSerializer
+    permission_classes = [AllowAny]
+    ordering_fields = ["display_name"]
+    ordering = ["display_name"]
+
+
+class CitationDatabaseViewSet(viewsets.ReadOnlyModelViewSet):
+    """API для просмотра баз цитирования"""
+    queryset = CitationDatabase.objects.all()
+    serializer_class = CitationDatabaseSerializer
+    permission_classes = [AllowAny]
+    ordering_fields = ["name"]
+    ordering = ["name"]
+
+
+class PublicationTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    """API для просмотра типов публикаций"""
+    queryset = PublicationType.objects.filter(is_active=True)
+    serializer_class = PublicationTypeSerializer
+    permission_classes = [AllowAny]
+    ordering_fields = ["name"]
+    ordering = ["name"]
+
+
+class PublicationScopeViewSet(viewsets.ReadOnlyModelViewSet):
+    """API для просмотра уровней публикаций"""
+    queryset = PublicationScope.objects.all()
+    serializer_class = PublicationScopeSerializer
+    permission_classes = [AllowAny]
+    ordering_fields = ["name"]
+    ordering = ["name"]
+
+
+class AuthorStatusViewSet(viewsets.ReadOnlyModelViewSet):
+    """API для просмотра статусов авторов"""
+    queryset = AuthorStatus.objects.all()
+    serializer_class = AuthorStatusSerializer
+    permission_classes = [AllowAny]
+    ordering_fields = ["name"]
+    ordering = ["name"]
+
+
+class ReportingPeriodViewSet(viewsets.ReadOnlyModelViewSet):
+    """API для просмотра отчётных периодов"""
+    queryset = ReportingPeriod.objects.filter(is_active=True)
+    serializer_class = ReportingPeriodSerializer
+    permission_classes = [AllowAny]
+    ordering_fields = ["display_order"]
+    ordering = ["display_order"]
+
+
+class MonthViewSet(viewsets.ReadOnlyModelViewSet):
+    """API для просмотра месяцев"""
+    queryset = Month.objects.all()
+    serializer_class = MonthSerializer
+    permission_classes = [AllowAny]
+    ordering_fields = ["number"]
+    ordering = ["number"]
+
+
+class EntryStatusViewSet(viewsets.ReadOnlyModelViewSet):
+    """API для просмотра статусов записей"""
+    queryset = EntryStatus.objects.all()
+    serializer_class = EntryStatusSerializer
+    permission_classes = [AllowAny]
+    ordering_fields = ["name"]
+    ordering = ["name"]
+
+
+class ModerationStatusViewSet(viewsets.ReadOnlyModelViewSet):
+    """API для просмотра статусов модерации"""
+    queryset = ModerationStatus.objects.all()
+    serializer_class = ModerationStatusSerializer
+    permission_classes = [AllowAny]
+    ordering_fields = ["name"]
+    ordering = ["name"]
+
+
+class PublisherViewSet(viewsets.ModelViewSet):
+    """API для управления издательствами"""
+    queryset = Publisher.objects.all()
+    serializer_class = PublisherSerializer
+    permission_classes = [IsAuthenticated]
+    search_fields = ["name", "city", "country"]
+    ordering_fields = ["name"]
+    ordering = ["name"]
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
