@@ -11,30 +11,29 @@
 
 .stats-header h1 {
   font-size: 1.75rem;
-  color: #166534;
+  color: var(--md-primary-dark);
   font-weight: 700;
 }
 
 .btn-export {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  color: white;
+  background: var(--md-primary);
+  color: var(--md-on-primary);
   border: none;
   padding: 0.75rem 1.25rem;
-  border-radius: 8px;
+  border-radius: var(--md-shape-full);
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+  transition: box-shadow 0.2s, filter 0.2s;
+  box-shadow: var(--md-elev-1);
 }
 
 .btn-export:hover {
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-  box-shadow: 0 6px 16px rgba(22, 101, 52, 0.4);
-  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: var(--md-elev-2);
 }
 
 .btn-export:disabled {
@@ -58,22 +57,25 @@
 .filter-item label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #166534;
+  color: var(--md-on-surface-variant);
 }
 
 .filter-item input,
 .filter-item select {
   padding: 0.6rem 1rem;
-  border: 2px solid #dcfce7;
-  border-radius: 8px;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--md-shape-sm);
   font-size: 0.9rem;
   min-width: 140px;
+  color: var(--md-on-surface);
+  background: var(--md-surface);
 }
 
 .filter-item input:focus,
 .filter-item select:focus {
   outline: none;
-  border-color: #22c55e;
+  border-color: var(--md-primary);
+  box-shadow: 0 0 0 1px var(--md-primary) inset;
 }
 
 .stats-cards {
@@ -87,33 +89,32 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: white;
+  background: var(--md-surface-container-low);
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(22, 101, 52, 0.1);
-  border: 1px solid #dcfce7;
+  border-radius: var(--md-shape-md);
+  box-shadow: var(--md-elev-1);
 }
 
 .stat-card.total .stat-icon {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border-radius: var(--md-shape-md);
+  background: var(--md-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--md-on-primary);
 }
 
 .stat-card.total .stat-value {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #166534;
+  color: var(--md-primary-dark);
 }
 
 .stat-card.total .stat-label {
   font-size: 0.95rem;
-  color: #666;
+  color: var(--md-on-surface-variant);
 }
 
 .charts-grid {
@@ -123,11 +124,10 @@
 }
 
 .chart-card {
-  background: white;
-  border-radius: 12px;
+  background: var(--md-surface-container-low);
+  border-radius: var(--md-shape-md);
   padding: 1.5rem;
-  box-shadow: 0 4px 15px rgba(22, 101, 52, 0.1);
-  border: 1px solid #dcfce7;
+  box-shadow: var(--md-elev-1);
 }
 
 .chart-card h3 {
@@ -135,13 +135,13 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 1rem;
-  color: #166534;
+  color: var(--md-on-surface);
   margin-bottom: 1.5rem;
   font-weight: 600;
 }
 
 .chart-card h3 svg {
-  color: #22c55e;
+  color: var(--md-primary);
 }
 
 .bar-chart {
@@ -159,21 +159,21 @@
 .bar-label {
   min-width: 50px;
   font-weight: 500;
-  color: #166534;
+  color: var(--md-on-surface-variant);
 }
 
 .bar-track {
   flex: 1;
   height: 24px;
-  background: #f0fdf4;
-  border-radius: 6px;
+  background: var(--md-surface-container-high);
+  border-radius: var(--md-shape-sm);
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  border-radius: 6px;
+  background: var(--md-primary);
+  border-radius: var(--md-shape-sm);
   transition: width 0.3s ease;
 }
 
@@ -181,7 +181,7 @@
   min-width: 40px;
   text-align: right;
   font-weight: 600;
-  color: #166534;
+  color: var(--md-on-surface-variant);
 }
 
 .pie-chart {
@@ -206,12 +206,12 @@
 .pie-label {
   flex: 1;
   font-size: 0.875rem;
-  color: #333;
+  color: var(--md-on-surface);
 }
 
 .pie-value {
   font-weight: 500;
-  color: #166534;
+  color: var(--md-on-surface-variant);
   font-size: 0.875rem;
 }
 
@@ -226,8 +226,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background: #f0fdf4;
-  border-radius: 8px;
+  background: var(--md-surface-container-high);
+  border-radius: var(--md-shape-sm);
 }
 
 .result-label {
@@ -236,12 +236,12 @@
 
 .result-value {
   font-weight: 700;
-  color: #166534;
+  color: var(--md-primary-dark);
 }
 
 .no-data {
   text-align: center;
   padding: 2rem;
-  color: #999;
+  color: var(--md-on-surface-variant);
   font-style: italic;
 }

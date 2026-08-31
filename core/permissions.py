@@ -66,7 +66,9 @@ class CanDeletePublication(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if is_admin(request.user):
             return True
-        return obj.owner == request.user and obj.status == 'active'
+        if is_nio_staff(request.user):
+            return obj.status != 'archived'
+        return obj.owner == request.user and obj.status != 'archived'
 
 
 class CanHardDeletePublication(permissions.BasePermission):

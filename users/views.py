@@ -6,6 +6,16 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
 from django.db.models import Q, Count
 
+
+def _build_tokens(user):
+    refresh = RefreshToken.for_user(user)
+    refresh['token_version'] = user.token_version or 0
+    refresh.access_token['token_version'] = user.token_version or 0
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
 from .models import User, Department
 from .serializers import (
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
@@ -26,13 +36,9 @@ class AuthViewSet(viewsets.GenericViewSet):
         serializer = UserCreateSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            refresh = RefreshToken.for_user(user)
             return Response({
                 'user': UserSerializer(user).data,
-                'tokens': {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                }
+                'tokens': _build_tokens(user),
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -50,13 +56,9 @@ class AuthViewSet(viewsets.GenericViewSet):
                         {'error': 'Аккаунт деактивирован'},
                         status=status.HTTP_403_FORBIDDEN
                     )
-                refresh = RefreshToken.for_user(user)
                 return Response({
                     'user': UserSerializer(user).data,
-                    'tokens': {
-                        'refresh': str(refresh),
-                        'access': str(refresh.access_token),
-                    }
+                    'tokens': _build_tokens(user),
                 })
             return Response(
                 {'error': 'Неверные учетные данные'},
@@ -99,6 +101,20 @@ class AuthViewSet(viewsets.GenericViewSet):
         try:
             refresh_token = request.data.get('refresh')
             token = RefreshToken(refresh_token)
+            user_id = token['user_id']
+            try:
+                user = User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                return Response(
+                    {'error': 'Неверный токен'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+            if (token.get('token_version') or 0) != (user.token_version or 0):
+                return Response(
+                    {'error': 'Сессия устарела'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+            token.access_token['token_version'] = user.token_version or 0
             return Response({
                 'access': str(token.access_token),
             })
@@ -140,7 +156,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def set_role(self, request, pk=None):
         user = self.get_object()
         new_role = request.data.get('role')
-        if new_role not in ['ADMIN', 'METHODIST']:
+        if new_role not in ['ADMIN', 'METHODIST', 'NIO_STAFF']:
             return Response(
                 {'error': 'Неверная роль'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -189,7 +205,7 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def publications(self, request, code=None):
         department = self.get_object()
-        publications = Publication.objects.filter(department=code)
+        publications = Publication.objects.filter(department__code=code)
         from core.serializers import PublicationListSerializer
         serializer = PublicationListSerializer(publications, many=True)
         return Response(serializer.data)
@@ -197,10 +213,10 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def statistics(self, request, code=None):
         department = self.get_object()
-        publications = Publication.objects.filter(department=code)
+        publications = Publication.objects.filter(department__code=code)
         
-        by_year = publications.values('year').annotate(count=models.Count('id')).order_by('-year')
-        by_result = publications.values('result').annotate(count=models.Count('id'))
+        by_year = publications.values('year').annotate(count=Count('id')).order_by('-year')
+        by_result = publications.values('result').annotate(count=Count('id'))
         
         return Response({
             'total': publications.count(),

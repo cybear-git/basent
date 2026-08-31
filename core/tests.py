@@ -5,27 +5,33 @@ from rest_framework import status
 from unittest.mock import patch, MagicMock
 import json
 
-from core.models import Publication, Publisher, DeleteRequest, ActivityLog
-from users.models import User
+from core.models import (
+    Publication, Publisher, DeleteRequest, ActivityLog,
+    PublicationTypeDict, CitationDatabaseDict,
+)
+from users.models import User, Department
 
 
 class PublicationModelTest(TestCase):
     def setUp(self):
+        self.department = Department.objects.get(code='КГПД')
+        self.publication_type = PublicationTypeDict.objects.get(code='article')
+        self.citation_db = CitationDatabaseDict.objects.get(code='RINC')
         self.publication = Publication.objects.create(
             title='Test Publication',
             author='Test Author',
             year=2024,
-            department='КГПД',
-            publication_type='article',
-            citation_db='RINC',
+            department=self.department,
+            publication_type=self.publication_type,
+            citation_db=self.citation_db,
             moderation_status='approved',
             status='active'
         )
     
     def test_publication_created(self):
         self.assertEqual(self.publication.title, 'Test Publication')
-        self.assertEqual(self.publication.publication_type, 'article')
-        self.assertEqual(self.publication.citation_db, 'RINC')
+        self.assertEqual(self.publication.publication_type.code, 'article')
+        self.assertEqual(self.publication.citation_db.code, 'RINC')
     
     def test_publication_str(self):
         self.assertIn('Test Publication', str(self.publication))
@@ -159,14 +165,17 @@ class PublicationViewSetTest(TestCase):
             department='КГПД'
         )
         self.client = Client()
+        self.department = Department.objects.get(code='КГПД')
+        self.publication_type = PublicationTypeDict.objects.get(code='article')
+        self.citation_db = CitationDatabaseDict.objects.get(code='RINC')
         
         self.publication = Publication.objects.create(
             title='Test Publication',
             author='Test Author',
             year=2024,
-            department='КГПД',
-            publication_type='article',
-            citation_db='RINC',
+            department=self.department,
+            publication_type=self.publication_type,
+            citation_db=self.citation_db,
             moderation_status='approved',
             status='active'
         )
@@ -233,14 +242,17 @@ class PublicationModerationTest(APITestCase):
             department='КГПД'
         )
         self.client = APIClient()
+        self.department = Department.objects.get(code='КГПД')
+        self.publication_type = PublicationTypeDict.objects.get(code='article')
+        self.citation_db = CitationDatabaseDict.objects.get(code='RINC')
         
         self.publication = Publication.objects.create(
             title='Test Publication',
             author='Test Author',
             year=2024,
-            department='КГПД',
-            publication_type='article',
-            citation_db='RINC',
+            department=self.department,
+            publication_type=self.publication_type,
+            citation_db=self.citation_db,
             moderation_status='pending',
             status='active'
         )

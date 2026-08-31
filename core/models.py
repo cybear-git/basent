@@ -8,27 +8,58 @@ def current_year():
     return datetime.date.today().year
 
 
+class ReferenceDict(models.Model):
+    """Базовый класс для справочников (словарей)."""
+
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код')
+    label = models.CharField(max_length=255, verbose_name='Название')
+    sort_order = models.PositiveIntegerField(default=0, verbose_name='Порядок сортировки')
+
+    class Meta:
+        abstract = True
+        ordering = ['sort_order', 'code']
+
+    def __str__(self):
+        return self.label
+
+
+class PublicationTypeDict(ReferenceDict):
+    class Meta:
+        verbose_name = 'Тип публикации'
+        verbose_name_plural = 'Типы публикаций'
+
+
+class CitationDatabaseDict(ReferenceDict):
+    class Meta:
+        verbose_name = 'База цитирования'
+        verbose_name_plural = 'Базы цитирования'
+
+
+class PublicationScopeDict(ReferenceDict):
+    class Meta:
+        verbose_name = 'Уровень публикации'
+        verbose_name_plural = 'Уровни публикаций'
+
+
+class AuthorStatusDict(ReferenceDict):
+    class Meta:
+        verbose_name = 'Статус автора'
+        verbose_name_plural = 'Статусы авторов'
+
+
+class ReportingPeriodDict(ReferenceDict):
+    class Meta:
+        verbose_name = 'Отчётный период'
+        verbose_name_plural = 'Отчётные периоды'
+
+
+class ResultDict(ReferenceDict):
+    class Meta:
+        verbose_name = 'Результат'
+        verbose_name_plural = 'Результаты'
+
+
 class Publication(models.Model):
-    RESULT_CHOICES = [
-        ('участник', 'Участник'),
-        ('призёр', 'Призёр'),
-        ('победитель', 'Победитель'),
-    ]
-
-    DEPARTMENT_CHOICES = [
-        ('КТОиТК', 'Кафедра таможенных операций и таможенного контроля'),
-        ('КТиТЭ', 'Кафедра товароведения и таможенной экспертизы'),
-        ('КУиЭТД', 'Кафедра управления и экономики таможенного дела'),
-        ('КЭТиМЭО', 'Кафедра экономической теории и международных экономических отношений'),
-        ('КГПД', 'Кафедра государственно-правовых дисциплин'),
-        ('КГрПД', 'Кафедра гражданско-правовых дисциплин'),
-        ('КУПД', 'Кафедра уголовно-правовых дисциплин'),
-        ('КГД', 'Кафедра гуманитарных дисциплин'),
-        ('КИЯ', 'Кафедра иностранных языков'),
-        ('КИиИТТ', 'Кафедра информатики и информационных таможенных технологий'),
-        ('КФП', 'Кафедра физической подготовки'),
-    ]
-
     MONTH_CHOICES = [
         (1, 'Январь'), (2, 'Февраль'), (3, 'Март'), (4, 'Апрель'),
         (5, 'Май'), (6, 'Июнь'), (7, 'Июль'), (8, 'Август'),
@@ -47,63 +78,9 @@ class Publication(models.Model):
         ('rejected', 'Отклонено'),
     ]
 
-    CITATION_DB_CHOICES = [
-        ('RINC', 'РИНЦ'),
-        ('VAK', 'ВАК'),
-        ('WOS', 'WOS'),
-        ('SCOPUS', 'Scopus'),
-        ('OTHER_DB', 'Другие издания'),
-        ('NONE', 'Без индексации'),
-    ]
-
-    PUBLICATION_TYPE_CHOICES = [
-        ('article', 'Статья'),
-        ('student_article', 'Статья студента'),
-        ('monograph', 'Монография'),
-        ('textbook', 'Учебник'),
-        ('tutorial', 'Учебное пособие'),
-        ('conference_paper', 'Тезисы докладов'),
-        ('software_certificate', 'Свидетельство ЭВМ'),
-        ('patent', 'Патенты на изобретения'),
-        ('student_research', 'НИРС'),
-        ('conference', 'Научная конференция'),
-        ('forum', 'Научный форум'),
-        ('competition', 'Научный конкурс'),
-        ('exhibition', 'Выставка'),
-        ('round_table', 'Круглый стол'),
-        ('conference_collection', 'Сборник трудов конференции'),
-    ]
-
-    PUBLICATION_SCOPE_CHOICES = [
-        ('international', 'Международное'),
-        ('all_russian', 'Всероссийское'),
-        ('regional', 'Региональное'),
-        ('interuniversity', 'Межвузовское'),
-        ('internal', 'Внутривузовское'),
-    ]
-
-    AUTHOR_STATUS_CHOICES = [
-        ('staff', 'Штатный сотрудник'),
-        ('student', 'Студент'),
-        ('compatibility', 'Совместитель'),
-        ('external', 'Внешний сотрудник'),
-    ]
-
-    REPORTING_PERIOD_CHOICES = [
-        ('1_quarter', '1 квартал'),
-        ('2_quarter', '2 квартал'),
-        ('3_quarter', '3 квартал'),
-        ('4_quarter', '4 квартал'),
-        ('1_period', '1 период'),
-        ('2_period', '2 период'),
-        ('3_period', '3 период'),
-        ('4_period', '4 период'),
-        ('annual', 'Годовой отчёт'),
-    ]
-
     title = models.TextField(verbose_name='Название публикации/мероприятия')
     author = models.TextField(verbose_name='Автор(ы)')
-    
+
     head = models.CharField(max_length=255, blank=True, verbose_name='Руководитель')
     executors = models.TextField(blank=True, verbose_name='Исполнители')
     location = models.CharField(max_length=255, blank=True, verbose_name='Место проведения')
@@ -121,22 +98,55 @@ class Publication(models.Model):
     students_count = models.PositiveIntegerField(default=0, verbose_name='Количество студентов')
     pages_count = models.PositiveIntegerField(default=0, verbose_name='Количество страниц')
 
-    result = models.CharField(max_length=20, choices=RESULT_CHOICES, blank=True, verbose_name='Результат')
-    citation_db = models.CharField(max_length=50, choices=CITATION_DB_CHOICES, blank=True, verbose_name='База данных и система цитирования')
-    
-    publication_type = models.CharField(
-        max_length=30,
-        choices=PUBLICATION_TYPE_CHOICES,
+    result = models.ForeignKey(
+        'ResultDict',
+        on_delete=models.PROTECT,
+        null=True,
         blank=True,
+        related_name='publications',
+        verbose_name='Результат'
+    )
+    citation_db = models.ForeignKey(
+        'CitationDatabaseDict',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='publications',
+        verbose_name='База данных и система цитирования'
+    )
+    publication_type = models.ForeignKey(
+        'PublicationTypeDict',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='publications',
         verbose_name='Тип публикации'
     )
-    publication_scope = models.CharField(
-        max_length=20,
-        choices=PUBLICATION_SCOPE_CHOICES,
+    publication_scope = models.ForeignKey(
+        'PublicationScopeDict',
+        on_delete=models.PROTECT,
+        null=True,
         blank=True,
+        related_name='publications',
         verbose_name='Уровень публикации'
     )
-    
+    author_status = models.ForeignKey(
+        'AuthorStatusDict',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='publications',
+        verbose_name='Статус автора'
+    )
+    reporting_period = models.ForeignKey(
+        'ReportingPeriodDict',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='publications',
+        verbose_name='Отчётный период'
+    )
+
     publisher = models.ForeignKey(
         'Publisher',
         on_delete=models.SET_NULL,
@@ -152,26 +162,21 @@ class Publication(models.Model):
         verbose_name='Объём в печатных листах'
     )
     circulation = models.PositiveIntegerField(default=0, verbose_name='Тираж')
-    
+
     doi = models.CharField(max_length=100, blank=True, verbose_name='DOI')
     edn_code = models.CharField(max_length=20, blank=True, verbose_name='EDN')
     elibrary_id = models.CharField(max_length=50, blank=True, verbose_name='ELibrary ID')
-    
-    reporting_period = models.CharField(
-        max_length=20,
-        choices=REPORTING_PERIOD_CHOICES,
-        blank=True,
-        verbose_name='Отчётный период'
-    )
+
     reporting_year = models.CharField(max_length=10, blank=True, verbose_name='Отчётный год')
-    
-    author_status = models.CharField(
-        max_length=20,
-        choices=AUTHOR_STATUS_CHOICES,
+
+    department = models.ForeignKey(
+        'users.Department',
+        on_delete=models.PROTECT,
+        null=True,
         blank=True,
-        verbose_name='Статус автора'
+        related_name='publications',
+        verbose_name='Кафедра'
     )
-    department = models.CharField(max_length=100, choices=DEPARTMENT_CHOICES, blank=True, default='КТОиТК', verbose_name='Кафедра')
     entry_month = models.IntegerField(choices=MONTH_CHOICES, default=datetime.date.today().month, verbose_name='Месяц внесения')
     event_date = models.DateField(null=True, blank=True, verbose_name='Дата проведения')
 

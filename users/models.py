@@ -17,6 +17,7 @@ class User(AbstractUser):
     )
     phone = models.CharField(max_length=20, blank=True, verbose_name='Телефон')
     department = models.CharField(max_length=100, blank=True, verbose_name='Кафедра')
+    token_version = models.PositiveIntegerField(default=0, verbose_name='Версия токена')
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -76,4 +77,4 @@ class Department(models.Model):
     
     def get_publications_count(self):
         from core.models import Publication
-        return Publication.objects.filter(department=self.code).count()
+        return Publication.objects.filter(department=self).count()
