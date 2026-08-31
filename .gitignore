@@ -3,21 +3,14 @@
 db.sqlite3
 
 # Python
-__pycache__/
 *.pyc
+__pycache__/
 *.pyo
 *.pyd
 .Python
 env/
 venv/
 .venv/
-.ENV
-.env
-*.env
-.env.local
-.env.*
-.env.local.*
-.python-version
 pip-log.txt
 pip-delete-this-directory.txt
 .tox/
@@ -28,15 +21,6 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
-.git/modules/
-.pytest_cache/
-.mypy_cache/
-.hypothesis/
-
-# Django
-*.pot
-*.po
-MANIFEST
 .DS_Store
 Thumbs.db
 ```

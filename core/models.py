@@ -32,7 +32,7 @@ class Department(models.Model):
 
 class ResultType(models.Model):
     """Справочник результатов (участник, призёр, победитель)"""
-    code = models.CharField(max_length=50, unique=True, verbose_name='Код результата')
+    code = models.CharField(max_length=50, unique=True, verbose_name='Код результата', default='participant')
     name = models.CharField(max_length=50, unique=True, verbose_name='Название результата')
     display_name = models.CharField(max_length=50, verbose_name='Отображаемое название')
     description = models.TextField(blank=True, verbose_name='Описание')
