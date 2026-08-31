@@ -96,7 +96,6 @@ class PublisherSerializer(serializers.ModelSerializer):
 
 
 class PublicationListSerializer(serializers.ModelSerializer):
-    owner_username = serializers.CharField(source='owner.username', read_only=True)
     department = DepartmentSerializer(read_only=True)
     status = EntryStatusSerializer(read_only=True)
     moderation_status_rel = ModerationStatusSerializer(read_only=True)
@@ -105,6 +104,8 @@ class PublicationListSerializer(serializers.ModelSerializer):
     publication_scope = PublicationScopeSerializer(read_only=True)
     author_status = AuthorStatusSerializer(read_only=True)
     reporting_period = ReportingPeriodSerializer(read_only=True)
+    moderated_by = UserSerializer(read_only=True)
+    owner = UserSerializer(read_only=True)
     
     class Meta:
         model = Publication
@@ -113,8 +114,8 @@ class PublicationListSerializer(serializers.ModelSerializer):
             'department', 'result', 'citation_db',
             'publication_type', 'publication_scope',
             'author_status', 'reporting_period',
-            'status', 'moderation_status_rel', 'moderated_by_username',
-            'owner_username', 'created_at', 'is_archived'
+            'status', 'moderation_status_rel', 'moderated_by',
+            'owner', 'created_at', 'is_archived'
         ]
 
 

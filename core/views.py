@@ -67,29 +67,42 @@ class PublicationViewSet(viewsets.ModelViewSet):
         
         include_archived = self.request.query_params.get('include_archived', 'false').lower() == 'true'
         
+        # Получаем статусы по кодам
+        try:
+            approved_status = ModerationStatus.objects.get(code='approved')
+            pending_status = ModerationStatus.objects.get(code='pending')
+            active_status = EntryStatus.objects.get(code='active')
+        except (ModerationStatus.DoesNotExist, EntryStatus.DoesNotExist):
+            # Если справочники ещё не заполнены, возвращаем пустой queryset
+            return ModerationStatus.objects.none()
+        
         if not user.is_authenticated:
-            q = q.filter(moderation_status='approved', status='active', is_archived=False)
+            q = q.filter(moderation_status_rel=approved_status, status=active_status, is_archived=False)
         elif not is_admin(user):
             if not include_archived:
                 q = q.filter(
-                    Q(moderation_status='approved') | Q(owner=user),
-                    status='active',
+                    Q(moderation_status_rel=approved_status) | Q(owner=user),
+                    status=active_status,
                     is_archived=False
                 )
             else:
                 q = q.filter(
-                    Q(moderation_status='approved') | Q(owner=user),
-                    status='active'
+                    Q(moderation_status_rel=approved_status) | Q(owner=user),
+                    status=active_status
                 )
         else:
             # Админ видит все активные публикации
             if not include_archived:
-                q = q.filter(status='active')
+                q = q.filter(status=active_status)
         
         # Фильтр по moderation_status из query params
         moderation_status = self.request.query_params.get('moderation_status')
         if moderation_status:
-            q = q.filter(moderation_status=moderation_status)
+            try:
+                mod_status_obj = ModerationStatus.objects.get(code=moderation_status)
+                q = q.filter(moderation_status_rel=mod_status_obj)
+            except ModerationStatus.DoesNotExist:
+                pass
         
         citation_db = self.request.query_params.get('citation_database')
         if citation_db:
